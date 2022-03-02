@@ -170,6 +170,7 @@ export const TransactionProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     checkWalletIsConnected();
+    getAllTransactions();
     checkIfTransactionsExits();
   }, []);
   return (
