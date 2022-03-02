@@ -1,7 +1,12 @@
 import React, { createContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 
-import { contractABI, contractAddress } from "../utils/constants";
+import {
+  contractABIRinkeby,
+  contractABIRopsten,
+  contractAddressRinkeby,
+  contractAddressRopsten
+} from "../utils/constants";
 
 export const TransactionContext = createContext<any>({});
 
@@ -11,6 +16,18 @@ declare var window: any;
 const getEthereumContract = () => {
   const provider = new ethers.providers.Web3Provider(ethereum);
   const signer = provider.getSigner();
+  console.log(ethereum.networkVersion);
+
+  let contractAddress;
+  let contractABI;
+
+  if (ethereum.networkVersion === 3) {
+    contractAddress = contractAddressRopsten;
+    contractABI = contractABIRopsten;
+  } else {
+    contractAddress = contractAddressRinkeby;
+    contractABI = contractABIRinkeby;
+  }
   const transactionContract = new ethers.Contract(
     contractAddress,
     contractABI,
@@ -52,7 +69,7 @@ export const TransactionProvider = ({ children }: { children: any }) => {
 
       const availableTransactions =
         await transactionContract.getAllTransactions();
-
+      console.log(availableTransactions);
       const structuredTransaction = availableTransactions.map(
         (transaction: any) => ({
           addressTo: transaction.receiver,
@@ -70,7 +87,7 @@ export const TransactionProvider = ({ children }: { children: any }) => {
     } catch (error) {
       console.log(error);
 
-      throw new Error("No ethereum object");
+      // throw new Error("No ethereum object");
     }
   };
 
@@ -157,14 +174,14 @@ export const TransactionProvider = ({ children }: { children: any }) => {
       setIsLoading(false);
       console.log(`Success - ${transactionHash.hash}`);
 
+      getAllTransactions();
       const transactionCount = await transactionContract.getTransactionCount();
 
       setTransactionCount(transactionCount.toNumber());
-      getAllTransactions();
     } catch (error) {
       console.log(error);
 
-      throw new Error("No ethereum object");
+      // throw new Error("No ethereum object");
     }
   };
 
