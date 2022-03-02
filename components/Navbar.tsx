@@ -22,14 +22,8 @@ const Navbar = () => {
   return (
     <nav className="w-full flex md:justify-center justify-between">
       <div className="md:flex-[0.5] flex-initial justify-center items-center">
-        <div className="w-32 cursor-pointer relative p-4">
-          <Image
-            src={logo}
-            alt="logo"
-            className="w-24 cursor-pointer"
-            // width={50}
-            // height={50}
-          />
+        <div className="w-32 cursor-pointer relative m-4">
+          <Image src={logo} alt="logo" className="w-24 cursor-pointer" />
         </div>
       </div>
       <ul className="text-white md:flex hidden list-none flex-row justify-between items-center flex-initial">
