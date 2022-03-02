@@ -117,6 +117,7 @@ export const TransactionProvider = ({ children }: { children: any }) => {
       });
 
       setCurrentAccount(accounts[0]);
+      getAllTransactions();
     } catch (error) {
       console.log(error);
 
