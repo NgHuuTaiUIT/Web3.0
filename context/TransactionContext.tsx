@@ -98,8 +98,7 @@ export const TransactionProvider = ({ children }: { children: any }) => {
   const checkIfTransactionsExits = async () => {
     try {
       const transactionContract = getEthereumContract();
-      const transactionCount = await transactionContract.getTransactionCount();
-
+      // const transactionCount = await transactionContract.getTransactionCount();
       window.localStorage.setItem("transactionCount", transactionCount);
     } catch (error) {
       console.log(error);
@@ -171,7 +170,7 @@ export const TransactionProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     checkWalletIsConnected();
-    getAllTransactions();
+    // getAllTransactions();
     checkIfTransactionsExits();
   }, []);
   return (

@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { HiMenuAlt4 } from "react-icons/hi";
-import { AiOutlineClose } from "react-icons/ai";
-import logo from "../images/logo.png";
 import Image from "next/image";
-import { title } from "process";
+import { useState } from "react";
+import { AiOutlineClose } from "react-icons/ai";
+import { HiMenuAlt4 } from "react-icons/hi";
+import logo from "../images/logo.png";
 
 const NavbarItem = ({
   title,
@@ -23,7 +22,15 @@ const Navbar = () => {
   return (
     <nav className="w-full flex md:justify-center justify-between">
       <div className="md:flex-[0.5] flex-initial justify-center items-center">
-        <Image src={logo} alt="logo" className="w-32 cursor-pointer" />
+        <div className="w-32 cursor-pointer relative p-4">
+          <Image
+            src={logo}
+            alt="logo"
+            className="w-24 cursor-pointer"
+            // width={50}
+            // height={50}
+          />
+        </div>
       </div>
       <ul className="text-white md:flex hidden list-none flex-row justify-between items-center flex-initial">
         {titles.map((item: string, index: number) => (
