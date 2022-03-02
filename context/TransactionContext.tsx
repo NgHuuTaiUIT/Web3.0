@@ -1,14 +1,12 @@
-import { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 
 import { contractABI, contractAddress } from "../utils/constants";
 
-export const TransactionContext = createContext();
+export const TransactionContext = createContext<any>({});
 
-// if (typeof window !== "undefined") {
-//   // Client-side-only code
-// const { ethereum } = window;
-// }
+let ethereum: any;
+declare var window: any;
 
 const getEthereumContract = () => {
   const provider = new ethers.providers.Web3Provider(ethereum);
@@ -22,7 +20,12 @@ const getEthereumContract = () => {
   return transactionContract;
 };
 
-export const TransactionProvider = ({ children }) => {
+export const TransactionProvider = ({ children }: { children: any }) => {
+  if (typeof window !== "undefined") {
+    // Client-side-only code
+    ethereum = window.ethereum;
+  }
+
   const [currentAccount, setCurrentAccount] = useState("");
   const [formData, setFormData] = useState({
     addressTo: "",
@@ -35,16 +38,41 @@ export const TransactionProvider = ({ children }) => {
     // localStorage.getItem("transactionCount")
     0
   );
+  const [transactions, setTransactions] = useState([]);
 
-  const handleChange = (e, name) => {
+  const handleChange = (e: any, name: any) => {
     setFormData(preState => ({ ...preState, [name]: e.target.value }));
   };
 
-  let ethereum;
-  if (typeof window !== "undefined") {
-    // Client-side-only code
-    ethereum = window.ethereum;
-  }
+  const getAllTransactions = async () => {
+    try {
+      if (!ethereum) return alert("Please install metamask");
+
+      const transactionContract = getEthereumContract();
+
+      const availableTransactions =
+        await transactionContract.getAllTransactions();
+
+      const structuredTransaction = availableTransactions.map(
+        (transaction: any) => ({
+          addressTo: transaction.receiver,
+          addressFrom: transaction.sender,
+          timestamp: new Date(
+            transaction.timestamp.toNumber() * 1000
+          ).toLocaleString(),
+          message: transaction.message,
+          amount: parseInt(transaction.amount._hex) / 10 ** 18,
+          keyword: transaction.keyword
+        })
+      );
+
+      setTransactions(structuredTransaction);
+    } catch (error) {
+      console.log(error);
+
+      throw new Error("No ethereum object");
+    }
+  };
 
   const checkWalletIsConnected = async () => {
     try {
@@ -54,10 +82,25 @@ export const TransactionProvider = ({ children }) => {
 
       if (accounts.length) {
         setCurrentAccount(accounts[0]);
+
+        getAllTransactions();
       } else {
         console.log("No accounts found");
       }
       console.log(accounts);
+    } catch (error) {
+      console.log(error);
+
+      throw new Error("No ethereum object");
+    }
+  };
+
+  const checkIfTransactionsExits = async () => {
+    try {
+      const transactionContract = getEthereumContract();
+      const transactionCount = await transactionContract.getTransactionCount();
+
+      window.localStorage.setItem("transactionCount", transactionCount);
     } catch (error) {
       console.log(error);
 
@@ -72,7 +115,7 @@ export const TransactionProvider = ({ children }) => {
       const accounts = await ethereum.request({
         method: "eth_requestAccounts"
       });
-      console.log(accounts);
+
       setCurrentAccount(accounts[0]);
     } catch (error) {
       console.log(error);
@@ -117,6 +160,7 @@ export const TransactionProvider = ({ children }) => {
       const transactionCount = await transactionContract.getTransactionCount();
 
       setTransactionCount(transactionCount.toNumber());
+      getAllTransactions();
     } catch (error) {
       console.log(error);
 
@@ -126,6 +170,7 @@ export const TransactionProvider = ({ children }) => {
 
   useEffect(() => {
     checkWalletIsConnected();
+    checkIfTransactionsExits();
   }, []);
   return (
     <TransactionContext.Provider
@@ -135,7 +180,9 @@ export const TransactionProvider = ({ children }) => {
         sendTransaction,
         formData,
         setFormData,
-        handleChange
+        handleChange,
+        transactions,
+        isLoading
       }}>
       {children}
     </TransactionContext.Provider>
